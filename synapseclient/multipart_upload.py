@@ -376,6 +376,7 @@ def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileS
         syn.logger.debug("progress made in this loop? %s" % progress)
 
         # Are we done, yet?
+        print(completed)
         if completed >= fileSize:
             try:
                 syn.logger.debug("attempting to finalize multipart upload because completed.value >= filesize"

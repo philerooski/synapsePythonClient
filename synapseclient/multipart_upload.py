@@ -289,9 +289,8 @@ def _upload_chunk(part, completed, status, syn, filename, get_chunk_function,
         # if part was successfully uploaded, increment progress
         if add_part_response["addPartState"] == "ADD_SUCCESS":
             syn.logger.debug("finished contacting Synapse about adding part %s" % partNumber)
-            with completed.get_lock():
-                completed.value += len(chunk)
-            printTransferProgress(completed.value, fileSize, prefix='Uploading', postfix=filename, dt=time.time()-t0,
+            completed += len(chunk)
+            printTransferProgress(completed, fileSize, prefix='Uploading', postfix=filename, dt=time.time()-t0,
                                   previouslyTransferred=bytes_already_uploaded)
         else:
             syn.logger.debug("did not successfully add part %s" % partNumber)
@@ -376,10 +375,9 @@ def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileS
         syn.logger.debug("progress made in this loop? %s" % progress)
 
         # Are we done, yet?
-        print(completed)
         if completed >= fileSize:
             try:
-                syn.logger.debug("attempting to finalize multipart upload because completed.value >= filesize"
+                syn.logger.debug("attempting to finalize multipart upload because completed >= filesize"
                                  " ({completed} >= {size})".format(completed=completed, size=fileSize))
                 status = _complete_multipart_upload(syn, status.uploadId)
                 if status.state == "COMPLETED":

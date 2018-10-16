@@ -130,7 +130,7 @@ def _get_presigned_urls(syn, uploadId, parts_to_upload):
      http://docs.synapse.org/rest/POST/file/multipart/uploadId/presigned/url/batch.html
     """
     if len(parts_to_upload) == 0:
-        return 
+        return
     presigned_url_request = {'uploadId': uploadId}
     uri = '/file/multipart/{uploadId}/presigned/url/batch'.format(uploadId=uploadId)
 
@@ -291,9 +291,8 @@ def _upload_chunk(part, completed, status, syn, filename, get_chunk_function,
         # if part was successfully uploaded, increment progress
         if add_part_response["addPartState"] == "ADD_SUCCESS":
             syn.logger.debug("finished contacting Synapse about adding part %s" % partNumber)
-            with completed.get_lock():
-                completed.value += len(chunk)
-            printTransferProgress(completed.value, fileSize, prefix='Uploading', postfix=filename, dt=time.time()-t0,
+            completed += len(chunk)
+            printTransferProgress(completed, fileSize, prefix='Uploading', postfix=filename, dt=time.time()-t0,
                                   previouslyTransferred=bytes_already_uploaded)
         else:
             syn.logger.debug("did not successfully add part %s" % partNumber)
@@ -309,7 +308,7 @@ def _upload_chunk(part, completed, status, syn, filename, get_chunk_function,
             syn.logger.debug("Encountered an exception: %s. Retrying...\n" % str(type(ex1)), exc_info=True)
 
 
-def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileSize, 
+def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileSize,
                       partSize=None, storageLocationId=None, **kwargs):
     """
     Multipart Upload.
@@ -382,7 +381,7 @@ def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileS
             # Are we done, yet?
             if completed >= fileSize:
                 try:
-                    syn.logger.debug("attempting to finalize multipart upload because completed.value >= filesize"
+                    syn.logger.debug("attempting to finalize multipart upload because completed >= filesize"
                                      " ({completed} >= {size})".format(completed=completed, size=fileSize))
                     status = _complete_multipart_upload(syn, status.uploadId)
                     if status.state == "COMPLETED":

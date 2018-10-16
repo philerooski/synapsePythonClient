@@ -26,8 +26,6 @@ import time
 import warnings
 from ctypes import c_bool
 
-from . import pool_provider
-
 try:
     from urllib.parse import urlparse
     from urllib.parse import parse_qs
@@ -130,7 +128,7 @@ def _get_presigned_urls(syn, uploadId, parts_to_upload):
      http://docs.synapse.org/rest/POST/file/multipart/uploadId/presigned/url/batch.html
     """
     if len(parts_to_upload) == 0:
-        return 
+        return
     presigned_url_request = {'uploadId': uploadId}
     uri = '/file/multipart/{uploadId}/presigned/url/batch'.format(uploadId=uploadId)
 
@@ -309,7 +307,7 @@ def _upload_chunk(part, completed, status, syn, filename, get_chunk_function,
             syn.logger.debug("Encountered an exception: %s. Retrying...\n" % str(type(ex1)), exc_info=True)
 
 
-def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileSize, 
+def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileSize,
                       partSize=None, storageLocationId=None, **kwargs):
     """
     Multipart Upload.
@@ -348,7 +346,6 @@ def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileS
     syn.logger.debug("previously completed %d parts, estimated %d bytes" % (completedParts, previously_completed_bytes))
     time_upload_started = time.time()
     retries = 0
-    mp = pool_provider.get_pool()
     try:
         while retries < MAX_RETRIES:
             syn.logger.debug("Started retry loop for multipart_upload. Currently %d/%d retries"
@@ -391,8 +388,6 @@ def _multipart_upload(syn, filename, contentType, get_chunk_function, md5, fileS
                     syn.logger.error("Attempt to complete the multipart upload failed with exception %s %s"
                                      % (type(ex1), ex1))
                     syn.logger.debug("multipart upload failed:", exc_info=True)
-    finally:
-        mp.terminate()
     if status["state"] != "COMPLETED":
         raise SynapseError("Upload {id} did not complete. Try again.".format(id=status["uploadId"]))
 

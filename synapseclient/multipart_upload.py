@@ -26,6 +26,8 @@ import time
 import warnings
 from ctypes import c_bool
 
+from . import pool_provider
+
 try:
     from urllib.parse import urlparse
     from urllib.parse import parse_qs
